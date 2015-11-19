@@ -12,7 +12,6 @@ class Endpoint(list):
     
     def __init__(self):
         super(Endpoint,self)
-
         self._set_base_url()
 
         
@@ -23,3 +22,10 @@ class Endpoint(list):
         if not self.base_url.endswith('/'): self.base_url += '/'
         
         self.url = urljoin(self.base_url, self.endpoint_name)
+        
+    def get(self, payload, timeout=5):
+        result = requests.get(self.url, params=payload, timeout=timeout)
+        if result.status_code != 200:
+            result.raise_for_status()
+        
+        return result.content
