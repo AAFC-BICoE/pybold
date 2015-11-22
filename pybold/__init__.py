@@ -6,7 +6,7 @@ import requests
 from urlparse import urljoin
 
 
-class Endpoint(list):   
+class Endpoint(object):   
     endpoint_name = None
     base_url = None
     
@@ -25,7 +25,7 @@ class Endpoint(list):
         
     def get(self, payload, timeout=5):
         result = requests.get(self.url, params=payload, timeout=timeout)
-        if result.status_code != 200:
+        if result.status_code != 200 and result.status_code != 304:
             result.raise_for_status()
         
         return result.content
