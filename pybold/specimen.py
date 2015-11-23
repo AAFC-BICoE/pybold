@@ -8,22 +8,16 @@ import __builtin__
 import json
 from lxml import objectify
 import pickle
+from samba.dcerpc.samr import Ids
 import xmltodict
 
 from pybold import PUBLIC_API_URL, Endpoint
 
 
-class Specimen(objectify.ObjectifiedElement):
+class Specimen(object):
     '''
     classdocs
     '''
-    
-    def __new__(cls, objectified_element=None, specimen_record_xml=None):
-        if isinstance(specimen_record_xml, __builtin__.str):
-            return super(Specimen, cls).__new__(cls, specimen_record_xml = objectify.fromstring(specimen_record_xml))
-        elif isinstance(objectified_element, objectify.ObjectifiedElement):
-            return super(Specimen, cls).__new__(cls, objectified_element = objectified_element)
-    
 
     def __init__(self, objectified_element=None, specimen_record_xml=None):
         if isinstance(specimen_record_xml, __builtin__.str):
@@ -31,8 +25,9 @@ class Specimen(objectify.ObjectifiedElement):
         elif isinstance(objectified_element, objectify.ObjectifiedElement):
             obj = objectified_element
         
-        #print obj.getchildren()
-        super(Specimen, self).__init__(obj)
+        self.record = obj
+        
+        super(Specimen, self).__init__()
 
     def get_taxonomy(self):
         if not hasattr(self.record, 'taxonomy'):
@@ -82,8 +77,8 @@ class Specimens(Endpoint):
     
         bold_specimens = objectify.fromstring(result)#.bold_records
         #print bold_specimens.getchildren()
-        for specimen in bold_specimens.record:
-            self.specimen_list.append(Specimen(specimen))
+        for record in bold_specimens.record:
+            self.specimen_list.append(Specimen(record))
     
         return self.specimen_list
     
@@ -93,11 +88,18 @@ class Specimens(Endpoint):
             taxonomies[specimen.get_record_id()] = specimen.get_taxonomy()
         return taxonomies 
     
+    def get_record_ids(self):
+        ids = [];
+        for specimen in self.specimen_list:
+            ids.append(specimen.get_record_id())    
+        return ids
+    
 if __name__ == "__main__":
     test = Specimens()
     print test.url
-    print test.get(ids='ACRJP618-11|ACRJP619-11').pop().get_taxonomy()
+    print test.get(ids='ACRJP618-11|ACRJP619-11')
     print test.get_taxonomies()
+    print test.get_record_ids()
 
     #test.get(ids='ACRJP618-11')
     #test.pop().get_taxonomy()
