@@ -10,7 +10,7 @@ import pickle
 import threading 
 
 from pybold import PUBLIC_API_URL, Endpoint
-from pybold.sequence import SequencesClient
+import pybold.sequence
 
 
 class Specimen(object):
@@ -25,6 +25,7 @@ class Specimen(object):
             obj = objectified_element
         
         self.record = obj
+        self.sequence = None
         
         super(Specimen, self).__init__()
 
@@ -56,7 +57,10 @@ class Specimen(object):
         return ( self.record.tracefiles.read[0], self.record.tracefiles.read[1] ) 
     
     def get_sequence(self):
-        return SequencesClient().get(ids=self.get_process_id()).pop()
+        if self.sequence is None:
+            self.sequence = pybold.sequence.SequencesClient().get(ids=self.get_process_id()).pop()
+        
+        return self.sequence
     
 class SpecimensClient(Endpoint):
     '''
@@ -107,9 +111,7 @@ class SpecimensClient(Endpoint):
     
     def get_sequences(self):
         ids_query = '|'.join(self.get_process_ids())
-        return SequencesClient(base_url = self.base_url).get(ids=ids_query)
-    
-    
+        return pybold.sequence.SequencesClient(base_url = self.base_url).get(ids=ids_query)
     
 if __name__ == "__main__":
     test = SpecimensClient()
@@ -118,7 +120,4 @@ if __name__ == "__main__":
     print test.get_taxonomies()
     print test.get_record_ids()
     print test.get_sequences()
-
-    #test.get(ids='ACRJP618-11')
-    #test.pop().get_taxonomy()
-    #print 'here'
+    print test.specimen_list.pop().get_tracefiles()

@@ -13,7 +13,7 @@ from lxml import objectify
 import pickle
 
 from pybold import Endpoint, PUBLIC_API_URL
-from pybold.specimen import SpecimensClient
+import pybold.specimen
 
 
 class Sequence(object):
@@ -25,6 +25,7 @@ class Sequence(object):
         Constructor
         '''
         self.sequence_record = sequence_record
+        self.specimen = None
         super(Sequence, self).__init__()
         
     def get_id(self):
@@ -46,7 +47,10 @@ class Sequence(object):
         return self.get_id().split('|')[3]
     
     def get_specimen(self):
-        return SpecimensClient().get(ids=self.get_process_id()).pop()
+        if self.specimen is None:
+            self.specimen = pybold.specimen.SpecimensClient().get(ids=self.get_process_id()).pop()
+             
+        return self.specimen
     
 class SequencesClient(Endpoint):
     '''
@@ -86,13 +90,13 @@ class SequencesClient(Endpoint):
     
     def get_specimens(self):
         ids_query = '|'.join(self.get_process_ids())
-        return SpecimensClient(self.base_url).get(ids=ids_query)
+        return pybold.specimen.SpecimensClient(self.base_url).get(ids=ids_query)
     
 if __name__ == "__main__":
     test = SequencesClient()
     #print test.url
     test.get(ids='ACRJP618-11|ACRJP619-11')
     print test.sequence_list[0].get_id()
-    #print test.sequence_list.pop().get_seq()
-    #print test.sequence_list.pop().get_record_id()
+    print test.sequence_list.pop().get_seq()
+    print test.sequence_list.pop().get_specimen().record
     
