@@ -13,6 +13,7 @@ from lxml import objectify
 import pickle
 
 from pybold import Endpoint, PUBLIC_API_URL
+from pybold.specimen import SpecimensClient
 
 
 class Sequence(object):
@@ -26,14 +27,28 @@ class Sequence(object):
         self.sequence_record = sequence_record
         super(Sequence, self).__init__()
         
-    def get_record_id(self):
+    def get_id(self):
         return self.sequence_record.id
     
-    def get_sequence(self):
+    def get_seq(self):
         return self.sequence_record.seq
     
+    def get_process_id(self):
+        return self.get_id().split('|')[0]
     
-class Sequences(Endpoint):
+    def get_identification(self):
+        return self.get_id().split('|')[1]
+    
+    def get_marker(self):
+        return self.get_id().split('|')[2]
+    
+    def get_accession(self):
+        return self.get_id().split('|')[3]
+    
+    def get_specimen(self):
+        return SpecimensClient().get(ids=self.get_process_id()).pop()
+    
+class SequencesClient(Endpoint):
     '''
     Classdocs
     '''
@@ -42,11 +57,11 @@ class Sequences(Endpoint):
     
     def __init__(self, base_url=PUBLIC_API_URL):
         self.base_url = base_url
-        super(Sequences, self).__init__()
+        super(SequencesClient, self).__init__()
     
     
     def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, marker=None):
-        result = super(Sequences, self).get({'taxon': taxon, 
+        result = super(SequencesClient, self).get({'taxon': taxon, 
                                     'ids': ids, 
                                     'bin': bins, 
                                     'container': containers, 
@@ -62,10 +77,22 @@ class Sequences(Endpoint):
     
         return self.sequence_list
     
+    def get_process_ids(self):
+        ids = []
+        for sequence in self.sequence_list:
+            ids.append(sequence.get_process_id())
+        
+        return ids
+    
+    def get_specimens(self):
+        ids_query = '|'.join(self.get_process_ids())
+        return SpecimensClient(self.base_url).get(ids=ids_query)
+    
 if __name__ == "__main__":
-    test = Sequences()
+    test = SequencesClient()
     #print test.url
     test.get(ids='ACRJP618-11|ACRJP619-11')
-    print test.sequence_list.pop().get_sequence()
+    print test.sequence_list[0].get_id()
+    #print test.sequence_list.pop().get_seq()
     #print test.sequence_list.pop().get_record_id()
     
