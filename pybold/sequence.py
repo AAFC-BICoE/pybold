@@ -8,6 +8,7 @@ Created on 2015-11-22
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 import StringIO
+from exceptions import TypeError
 import json
 from lxml import objectify
 import pickle
@@ -24,33 +25,47 @@ class Sequence(object):
         '''
         Constructor
         '''
+        if not isinstance(sequence_record, SeqRecord):
+            raise TypeError()
+        
         self.sequence_record = sequence_record
         self.specimen = None
         super(Sequence, self).__init__()
-        
-    def get_id(self):
+    
+    @property
+    def id(self):
         return self.sequence_record.id
     
-    def get_seq(self):
+    @property
+    def seq(self):
         return self.sequence_record.seq
     
-    def get_process_id(self):
-        return self.get_id().split('|')[0]
+    @property
+    def process_id(self):
+        return self.id.split('|')[0]
     
-    def get_identification(self):
-        return self.get_id().split('|')[1]
+    @property
+    def identification(self):
+        return self.id.split('|')[1]
     
-    def get_marker(self):
-        return self.get_id().split('|')[2]
+    @property
+    def marker(self):
+        return self.id.split('|')[2]
     
-    def get_accession(self):
-        return self.get_id().split('|')[3]
+    @property
+    def accession(self):
+        return self.id.split('|')[3]
     
-    def get_specimen(self):
-        if self.specimen is None:
-            self.specimen = pybold.specimen.SpecimensClient().get(ids=self.get_process_id()).pop()
+    @property
+    def specimen(self):
+        if self.__specimen is None:
+            self.specimen = pybold.specimen.SpecimensClient().get(ids=self.process_id).pop()
              
-        return self.specimen
+        return self.__specimen
+    
+    @specimen.setter
+    def specimen(self, specimen_obj):
+        self.__specimen = specimen_obj
     
 class SequencesClient(Endpoint):
     '''
@@ -84,7 +99,7 @@ class SequencesClient(Endpoint):
     def get_process_ids(self):
         ids = []
         for sequence in self.sequence_list:
-            ids.append(sequence.get_process_id())
+            ids.append(sequence.process_id)
         
         return ids
     
@@ -96,7 +111,8 @@ if __name__ == "__main__":
     test = SequencesClient()
     #print test.url
     test.get(ids='ACRJP618-11|ACRJP619-11')
-    print test.sequence_list[0].get_id()
-    print test.sequence_list.pop().get_seq()
-    print test.sequence_list.pop().get_specimen().record
+    print test.sequence_list[0].id
+    print test.sequence_list[0].seq
+    print test.sequence_list[0].specimen.taxonomy
+    print test.sequence_list[1].specimen.taxonomy
     
