@@ -23,13 +23,17 @@ class Specimen(object):
             obj = objectify.fromstring(specimen_record_xml)
         elif isinstance(objectified_element, objectify.ObjectifiedElement):
             obj = objectified_element
+        elif objectified_element is None and specimen_record_xml is None:
+            raise ValueError()
+        
         
         self.record = obj
         self.sequence = None
         
         super(Specimen, self).__init__()
-
-    def get_taxonomy(self):
+    
+    @property
+    def taxonomy(self):
         if not hasattr(self.record, 'taxonomy'):
             return None
         
@@ -44,23 +48,33 @@ class Specimen(object):
 
         return taxonomy
     
-    def get_record_id(self):
+    @property
+    def record_id(self):
         return int(self.record.record_id)
     
-    def get_process_id(self):
+    @property
+    def process_id(self):
         return str(self.record.processid)
     
-    def get_tracefiles(self):
+    @property
+    def tracefiles(self):
         if not hasattr(self.record, 'tracefiles'):
             return None
         
         return ( self.record.tracefiles.read[0], self.record.tracefiles.read[1] ) 
     
-    def get_sequence(self):
-        if self.sequence is None:
-            self.sequence = pybold.sequence.SequencesClient().get(ids=self.get_process_id()).pop()
+    @property
+    def sequence(self):
+        # If property is not set, then call the setter
+        if self.__sequence is None:
+            # Provide the setter with a Sequence object using an API query that fetches the sequence
+            self.sequence(pybold.sequence.SequencesClient().get(ids=self.process_id).pop())
         
-        return self.sequence
+        return self.__sequence
+    
+    @sequence.setter
+    def sequence(self, sequence_obj):        
+        self.__sequence =  sequence_obj
     
 class SpecimensClient(Endpoint):
     '''
@@ -93,19 +107,19 @@ class SpecimensClient(Endpoint):
     def get_taxonomies(self):
         taxonomies = {}
         for specimen in self.specimen_list:
-            taxonomies[specimen.get_record_id()] = specimen.get_taxonomy()
+            taxonomies[specimen.record_id] = specimen.taxonomy
         return taxonomies 
     
     def get_record_ids(self):
         ids = []
         for specimen in self.specimen_list:
-            ids.append(specimen.get_record_id())    
+            ids.append(specimen.record_id)    
         return ids
     
     def get_process_ids(self):
         ids = []
         for specimen in self.specimen_list:
-            ids.append(specimen.get_process_id())
+            ids.append(specimen.process_id)
         
         return ids
     
@@ -120,4 +134,8 @@ if __name__ == "__main__":
     print test.get_taxonomies()
     print test.get_record_ids()
     print test.get_sequences()
-    print test.specimen_list.pop().get_tracefiles()
+    print test.get_sequences().pop().seq
+    print test.specimen_list[0].taxonomy
+    print test.specimen_list[1].taxonomy
+
+    #print test.specimen_list.pop().tracefiles()
