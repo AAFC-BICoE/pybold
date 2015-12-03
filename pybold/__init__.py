@@ -7,8 +7,8 @@ from urlparse import urljoin
 
 
 class Endpoint(object):   
-    endpoint_name = None
-    base_url = None
+    ENDPOINT_NAME = None
+    base_url = PUBLIC_API_URL
     
     def __init__(self):
         super(Endpoint,self)
@@ -21,7 +21,7 @@ class Endpoint(object):
         
         if not self.base_url.endswith('/'): self.base_url += '/'
         
-        self.url = urljoin(self.base_url, self.endpoint_name)
+        self.url = urljoin(self.base_url, self.ENDPOINT_NAME)
         
     def get(self, payload, timeout=5):
         result = requests.get(self.url, params=payload, timeout=timeout)

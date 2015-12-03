@@ -80,12 +80,14 @@ class SpecimensClient(Endpoint):
     '''
     classDocstring
     '''
-    specimen_list = []
-    endpoint_name = 'specimen'
+    ENDPOINT_NAME = 'specimen'
     
     def __init__(self, base_url=PUBLIC_API_URL):
         self.base_url = base_url
         super(SpecimensClient, self).__init__()
+        
+        self.specimen_list = []
+
 
     def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None):
         result = super(SpecimensClient, self).get({'taxon': taxon, 

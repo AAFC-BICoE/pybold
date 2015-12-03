@@ -71,13 +71,14 @@ class SequencesClient(Endpoint):
     '''
     Classdocs
     '''
-    sequence_list = []
-    endpoint_name = 'sequence'
+    ENDPOINT_NAME = 'sequence'
     
     def __init__(self, base_url=PUBLIC_API_URL):
         self.base_url = base_url
         super(SequencesClient, self).__init__()
-    
+        
+        self.sequence_list = []
+
     
     def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, marker=None):
         result = super(SequencesClient, self).get({'taxon': taxon, 
