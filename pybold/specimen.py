@@ -29,6 +29,7 @@ class Specimen(object):
         
         self.record = obj
         self.sequence = None
+        self.tracefiles = None
         
         super(Specimen, self).__init__()
     
@@ -56,12 +57,12 @@ class Specimen(object):
     def process_id(self):
         return str(self.record.processid)
     
-    @property
-    def tracefiles(self):
-        if not hasattr(self.record, 'tracefiles'):
-            return None
-        
-        return ( self.record.tracefiles.read[0], self.record.tracefiles.read[1] ) 
+#     @property
+#     def tracefiles(self):
+#         if not hasattr(self.record, 'tracefiles'):
+#             return None
+#         
+#         return ( self.record.tracefiles.read[0], self.record.tracefiles.read[1] ) 
     
     @property
     def sequence(self):
@@ -75,6 +76,17 @@ class Specimen(object):
     @sequence.setter
     def sequence(self, sequence_obj):        
         self.__sequence =  sequence_obj
+    
+    @property
+    def tracefiles(self):
+        if self._tracefiles is None:
+            self.tracefiles = pybold.tracefile.TracefilesClient().get(ids=self.process_id)
+            
+        return self._tracefiles
+    
+    @tracefiles.setter
+    def tracefiles(self, traces_list):
+        self._tracefiles = traces_list
     
 class SpecimensClient(Endpoint):
     '''
@@ -139,5 +151,5 @@ if __name__ == "__main__":
     print test.get_sequences().pop().seq
     print test.specimen_list[0].taxonomy
     print test.specimen_list[1].taxonomy
-
+    print test.specimen_list[1].tracefiles
     #print test.specimen_list.pop().tracefiles()
