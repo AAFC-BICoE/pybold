@@ -20,7 +20,6 @@ class Tracefile(object):
     classdocs
     '''
 
-
     def __init__(self, process_id, fileobj, marker, taxon, genbank_accession, filename):
         '''
         Constructor
@@ -36,7 +35,6 @@ class Tracefile(object):
         self.filename = filename
 
         super(Tracefile, self).__init__()
-
 
     @property
     def format(self):
@@ -58,7 +56,7 @@ class Tracefile(object):
         # If property is not set, then call the setter
         if self.__sequence is None:
             # Provide the setter with a Sequence object using an API query that fetches the sequence
-            self.sequence(pybold.sequence.SequencesClient().get(ids=self.process_id).pop())
+            self.sequence = pybold.sequence.SequencesClient().get(ids=self.process_id).pop()
         
         return self.__sequence
     
@@ -66,7 +64,7 @@ class Tracefile(object):
     def sequence(self, sequence_obj):        
         self.__sequence =  sequence_obj
 
-    def write(self, dir_path=None, filename=None):
+    def to_file(self, dir_path=None, filename=None):
         if dir_path is None:
             dir_path = os.path.curdir
         else:
@@ -84,8 +82,9 @@ class Tracefile(object):
         
         self.fileobj.seek(original_pos)
         
+        return full_path
+     
 class TracefilesClient(Endpoint):
-    sequence_list = []
     ENDPOINT_NAME = 'trace'
     
     def __init__(self, base_url=PUBLIC_API_URL):
@@ -155,13 +154,36 @@ class TracefilesClient(Endpoint):
                                        )
             
         chromat_tar.close()
-            
+
+    def get_process_ids(self):
+        ids = []
+        for tracefile in self.tracefile_list:
+            ids.append(tracefile.process_id)
+        
+        return ids
+
+    def get_sequences(self):
+        ids_query = '|'.join(self.get_process_ids())
+        return pybold.sequence.SequencesClient(self.base_url).get(ids=ids_query)
+        
+    def get_specimens(self):
+        ids_query = '|'.join(self.get_process_ids())
+        return pybold.specimen.SpecimensClient(self.base_url).get(ids=ids_query)
+        
+
 if __name__ == "__main__":
     test = TracefilesClient()
     test.get(ids='ACRJP618-11|ACRJP619-11')
     print test.tracefile_list[0].fileobj.readline()
     print test.tracefile_list[0].format
-    test.tracefile_list[0].write()
+    print test.tracefile_list[0].process_id
+    print test.tracefile_list[0].marker
+    print test.tracefile_list[0].taxon
+    print test.tracefile_list[0].genbank_accession
+    print test.tracefile_list[0].filename
+    test.tracefile_list[0].to_file()
     print test.tracefile_list[0].sequence
     print test.tracefile_list[0].specimen
+    print test.get_sequences()
+    print test.get_specimens()
     

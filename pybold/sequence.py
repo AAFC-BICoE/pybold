@@ -9,12 +9,10 @@ from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 import StringIO
 from exceptions import TypeError
-import json
-from lxml import objectify
-import pickle
 
 from pybold import Endpoint, PUBLIC_API_URL
 import pybold.specimen
+import pybold.tracefile
 
 
 class Sequence(object):
@@ -120,6 +118,10 @@ class SequencesClient(Endpoint):
         ids_query = '|'.join(self.get_process_ids())
         return pybold.specimen.SpecimensClient(self.base_url).get(ids=ids_query)
     
+    def get_tracefiles(self):
+        ids_query = '|'.join(self.get_process_ids())
+        return pybold.tracefile.TracefilesClient(self.base_url).get(ids=ids_query)
+    
 if __name__ == "__main__":
     test = SequencesClient()
     #print test.url
@@ -128,5 +130,5 @@ if __name__ == "__main__":
     print test.sequence_list[0].seq
     print test.sequence_list[0].specimen.taxonomy
     print test.sequence_list[1].specimen.taxonomy
-    print test.sequence_list[1].tracefiles()
+    print test.sequence_list[1].tracefiles
     

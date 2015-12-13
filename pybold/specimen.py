@@ -11,6 +11,7 @@ import threading
 
 from pybold import PUBLIC_API_URL, Endpoint
 import pybold.sequence
+import pybold.tracefile
 
 
 class Specimen(object):
@@ -69,7 +70,7 @@ class Specimen(object):
         # If property is not set, then call the setter
         if self.__sequence is None:
             # Provide the setter with a Sequence object using an API query that fetches the sequence
-            self.sequence(pybold.sequence.SequencesClient().get(ids=self.process_id).pop())
+            self.sequence = pybold.sequence.SequencesClient().get(ids=self.process_id).pop()
         
         return self.__sequence
     
@@ -139,7 +140,11 @@ class SpecimensClient(Endpoint):
     
     def get_sequences(self):
         ids_query = '|'.join(self.get_process_ids())
-        return pybold.sequence.SequencesClient(base_url = self.base_url).get(ids=ids_query)
+        return pybold.sequence.SequencesClient(self.base_url).get(ids=ids_query)
+    
+    def get_tracefiles(self):
+        ids_query = '|'.join(self.get_process_ids())
+        return pybold.tracefile.TracefilesClient(self.base_url).get(ids=ids_query)
     
 if __name__ == "__main__":
     test = SpecimensClient()
