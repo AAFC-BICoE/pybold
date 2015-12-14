@@ -58,12 +58,24 @@ class Specimen(object):
     def process_id(self):
         return str(self.record.processid)
     
-#     @property
-#     def tracefiles(self):
-#         if not hasattr(self.record, 'tracefiles'):
-#             return None
-#         
-#         return ( self.record.tracefiles.read[0], self.record.tracefiles.read[1] ) 
+    def geo(self):
+        class Geography():
+            def __init__(self):
+                self.country = None
+                self.province = None
+                self.region = None
+                self.coordinates = (None, None)
+        
+        geography = Geography()
+        try:
+            geography.country = self.record.collection_event.country
+            geography.province = self.record.collection_event.province
+            geography.region = self.record.collection_event.region
+            geography.coordinates = (self.record.collection_event.coordinates.lat, self.record.collection_event.coordinates.long)
+        except KeyError:
+            pass
+        
+        return geography
     
     @property
     def sequence(self):
