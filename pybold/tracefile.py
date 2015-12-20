@@ -92,7 +92,7 @@ class TracefilesClient(Endpoint):
         self.tracefile_list = []
         super(TracefilesClient, self).__init__()
     
-    def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, marker=None):
+    def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, marker=None, timeout=5):
         '''
         @raise tarfile.ReadError: If the BOLD API return an invalid tarfile
         '''
@@ -104,7 +104,7 @@ class TracefilesClient(Endpoint):
                                     'institutions': institutions, 
                                     'researchers': researchers, 
                                     'geo': geo,
-                                    'marker': marker })
+                                    'marker': marker }, timeout=timeout)
 
         self._parse_tracefiles(result)
         

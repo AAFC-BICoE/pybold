@@ -90,7 +90,7 @@ class SequencesClient(Endpoint):
         self.sequence_list = []
 
     
-    def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, marker=None):
+    def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, marker=None, timeout=5):
         result = super(SequencesClient, self).get({'taxon': taxon, 
                                     'ids': ids, 
                                     'bin': bins, 

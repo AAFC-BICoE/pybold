@@ -44,7 +44,7 @@ class Specimen(object):
         for rank in ranks:
             name = None
             if hasattr(self.record.taxonomy, rank):
-                name = getattr(self.record.taxonomy, rank).taxon.name
+                name = str(getattr(self.record.taxonomy, rank).taxon.name)
             
             taxonomy[rank] = name or ''
 
@@ -58,7 +58,8 @@ class Specimen(object):
     def process_id(self):
         return str(self.record.processid)
     
-    def geo(self):
+    @property
+    def geography(self):
         class Geography():
             def __init__(self):
                 self.country = None
@@ -66,16 +67,16 @@ class Specimen(object):
                 self.region = None
                 self.coordinates = (None, None)
         
-        geography = Geography()
+        geo = Geography()
         try:
-            geography.country = self.record.collection_event.country
-            geography.province = self.record.collection_event.province
-            geography.region = self.record.collection_event.region
-            geography.coordinates = (self.record.collection_event.coordinates.lat, self.record.collection_event.coordinates.long)
-        except KeyError:
+            geo.country = self.record.collection_event.country
+            geo.province = self.record.collection_event.province
+            geo.region = self.record.collection_event.region
+            geo.coordinates = (self.record.collection_event.coordinates.lat, self.record.collection_event.coordinates.long)
+        except (KeyError, AttributeError):
             pass
         
-        return geography
+        return geo
     
     @property
     def sequence(self):
@@ -114,7 +115,7 @@ class SpecimensClient(Endpoint):
         self.specimen_list = []
 
 
-    def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None):
+    def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, timeout=5):
         result = super(SpecimensClient, self).get({'taxon': taxon, 
                                     'ids': ids, 
                                     'bin': bins, 
@@ -122,7 +123,7 @@ class SpecimensClient(Endpoint):
                                     'institutions': institutions, 
                                     'researchers': researchers, 
                                     'geo': geo, 
-                                    'format': 'xml'})
+                                    'format': 'xml'}, timeout=timeout)
     
         bold_specimens = objectify.fromstring(result)
         #print bold_specimens.getchildren()
@@ -161,7 +162,7 @@ class SpecimensClient(Endpoint):
 if __name__ == "__main__":
     test = SpecimensClient()
     print test.url
-    print test.get(ids='ACRJP618-11|ACRJP619-11')
+    print test.get(taxon='ACRJP618-11|ACRJP619-11')
     print test.get_taxonomies()
     print test.get_record_ids()
     print test.get_sequences()
