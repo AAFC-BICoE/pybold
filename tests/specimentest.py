@@ -6,32 +6,34 @@ Created on 2015-12-12
 from nose.tools import assert_is_instance
 import unittest
 
+from pybold.sequence import Sequence
 from pybold.specimen import SpecimensClient
 import pybold.specimen
+from pybold.tracefile import Tracefile
 
 
 class SpecimensClientTest(unittest.TestCase):
     def setUp(self):
+        # Search criteria to be used and validated against
         self.process_ids = ["BOM1525-10", "BOM1528-10", "GBIR5337-13", "KKBNA817-05", "KKBNA820-05", "KKBNA821-05", 
                             "KKBNA824-05", "KKBNA827-05", "KKBNA830-05", "KKBNA831-05", "KKBNA834-05", "KKBNA840-05", 
-                            "KKBNA851-05", "KKBNA852-05", "KKBNA854-05", "KKBNA855-05", "KKBNA856-05", "KKBNA857-05", 
-                            "KKBNA859-05", "KKBNA861-05", "KKBNA866-05", "KKBNA867-05", "KKBNA872-05", "KKBNA875-05", 
-                            "KKBNA986-06", "BOTW348-05", "GBIR3737-13", "GBIR4109-13", "GBIR5335-13", "KBNA876-04", 
-                            "KBNA877-04", "KKBNA825-05", "KKBNA826-05", "KKBNA828-05", "KKBNA833-05", "KKBNA836-05", 
-                            "KKBNA839-05", "KKBNA842-05", "KKBNA843-05", "KKBNA846-05", "KKBNA847-05", "KKBNA849-05", 
-                            "KKBNA850-05", "KKBNA858-05", "KKBNA863-05", "KKBNA865-05", "KKBNA868-05", "KKBNA871-05", 
-                            "KKBNA983-06", "KKBNA990-06", "BOTW347-05", "CDAMH045-05", "CDAMH062-05", "GBIR1167-08"]
+                            "KKBNA851-05", "KKBNA852-05", "KKBNA854-05", "KKBNA855-05", "KKBNA856-05", "KKBNA857-05"]
+        self.record_ids = ["6283631", "6283648", "6283659", "6283679", "5064977", "5064989", "5065007", "5065009", 
+                           "5065014", "6039995", "6039996", "6040002", "6040009", "6040013", "6040016", "6040035", 
+                           "6040047", "6040055", "6040056", "6040057", "6040061", "6040062", "6040077", "6040078"]
         self.taxons = ["Archaeorhizomycetes", "Arthoniomycetes"]
         self.geographies = ["Canada", "United States"]
         self.bins = ["BOLD:AAA5125", "BOLD:AAA5126"]
         #self.containers = ["ACRJP", "ACRJI"]
         self.institutions = ["Biodiversity Institute of Ontario", "Agriculture and Agri-Food Canada"]
-        self.researchers = ["Rodolphe Rougerie|Hai D. T. Nguyen"]
+        self.researchers = ["Rodolphe Rougerie","Hai D. T. Nguyen"]
 
+        # Instantiate the SpecimensClient class to be used throughout all tests
         self.specimen_client = pybold.specimen.SpecimensClient()
 
     def tearDown(self):
         self.process_ids = None
+        self.record_ids = None
         self.taxons = None
         self.bins = None
         self.institutions = None
@@ -44,7 +46,7 @@ class SpecimensClientTest(unittest.TestCase):
         
     def test_specimen_list_attribute(self):
         self.assertTrue(hasattr(self.specimen_client, 'specimen_list'), 'SpecimensClient does not have a specimen_list attribute')
-        self.assertIsInstance(self.specimen_client.specimen_list, list, 'SpecimensClient.specimen_list must be of type list')
+        self.assertIsInstance(self.specimen_client.specimen_list, list, 'SpecimensClient.specimen_list must be of a list')
        
     def _test_get(self,taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, timeout=5):
         specimen_list = self.specimen_client.get(taxon=taxon, 
@@ -92,22 +94,57 @@ class SpecimensClientTest(unittest.TestCase):
         specimen_list = self._test_get(institutions='|'.join(self.institutions), researchers='|'.join(self.researchers), timeout=10)
         for specimen in specimen_list:
             found = False
-            specimen_researchers = ' '.join([str(specimen.record.taxonomy.identification_provided_by), str(specimen.record.collection_event.collectors)])
-            for taxon in self.researchers:
-                if taxon in specimen_researchers:
+            
+            specimen_researchers = []
+            if hasattr(specimen.record.taxonomy, "identification_provided_by"): 
+                specimen_researchers.append(str(specimen.record.taxonomy.identification_provided_by))
+            if hasattr(specimen.record.collection_event, "collectors"):
+                specimen_researchers.append(str(specimen.record.collection_event.collectors))
+            
+            specimen_researchers = ' '.join(specimen_researchers).upper()
+            for researcher in self.researchers:
+                if researcher.upper() in specimen_researchers:
                     found = True
                     break
             
             self.assertTrue(found, 'Specimen {} does not match the researcher search critera.'.format(specimen.process_id))
             
             found = False
-            specimen_institution = [ specimen.record.specimen_indentifiers.institution_storing ]
-            for geo in self.institutions:
-                if geo in specimen_institution:
+            specimen_institution = str(specimen.record.specimen_identifiers.institution_storing).upper()
+            for institution in self.institutions:
+                if institution.upper() in specimen_institution:
                     found = True
                     break
             
             self.assertTrue(found, 'Specimen {} does not match the institution search criteria.'.format(specimen.process_id))
+    
+    def test_get_taxonomies(self):
+        self.specimen_client.get(ids='|'.join(self.process_ids))
+        specimen_taxonomies = self.specimen_client.get_taxonomies()
+
+        self.assertIsInstance(specimen_taxonomies, dict, "SpecimensClient.get_taxonomies() should return a dictionary with process ID keys and taxonomy dictionary values.")
+        for process_id, taxonomy in specimen_taxonomies.iteritems(): 
+            self.assertIn(process_id, self.process_ids, "Process ID {} was not in the dictionary returned by SpecimensClient.get_taxonomies().".format(process_id))
+            self.assertIsInstance(taxonomy, dict, "The dictionary's values returned by SpecimensClient.get_taxonomies() are not dictionaries.")        
+                 
+    def test_get_record_ids(self):
+        self.specimen_client.get(ids='|'.join(self.process_ids))
+        record_ids = self.specimen_client.get_record_ids()
+        self.assertIsInstance(record_ids, list, "SpecimensClient.get_record_ids() should return a list of record ids.")
+    
+    def test_sequences(self):
+        self.specimen_client.get(ids='|'.join(self.process_ids))
+        sequences = self.specimen_client.get_sequences()
+        self.assertIsInstance(sequences, list, "SpecimensClient.get_sequences() should return a list of Sequence.")
+        for sequence in sequences:
+            self.assertIsInstance(sequence, Sequence, "SpecimensClient.get_sequences() should return a list of Sequence.")
+        
+    def test_get_tracefiles(self):
+        self.specimen_client.get(ids='|'.join(self.process_ids))
+        tracefiles = self.specimen_client.get_tracefiles()
+        self.assertIsInstance(tracefiles, list, "SpecimensClient.get_tracefiles() should return a list of Tracefile.")
+        for tracefile in tracefiles:
+            self.assertIsInstance(tracefile, Tracefile, "SpecimensClient.get_tracefiles() should return a list of Tracefile.")
     
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

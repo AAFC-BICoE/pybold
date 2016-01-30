@@ -135,7 +135,7 @@ class SpecimensClient(Endpoint):
     def get_taxonomies(self):
         taxonomies = {}
         for specimen in self.specimen_list:
-            taxonomies[specimen.record_id] = specimen.taxonomy
+            taxonomies[specimen.process_id] = specimen.taxonomy
         return taxonomies 
     
     def get_record_ids(self):
