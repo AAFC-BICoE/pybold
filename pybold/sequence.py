@@ -32,8 +32,8 @@ class Sequence(object):
         super(Sequence, self).__init__()
     
     @property
-    def id(self):
-        return self.sequence_record.id
+    def _description(self):
+        return self.sequence_record.description
     
     @property
     def seq(self):
@@ -41,19 +41,19 @@ class Sequence(object):
     
     @property
     def process_id(self):
-        return self.id.split('|')[0]
+        return self._description.split('|')[0]
     
     @property
     def identification(self):
-        return self.id.split('|')[1]
+        return self._description.split('|')[1]
     
     @property
     def marker(self):
-        return self.id.split('|')[2]
+        return self._description.split('|')[2]
     
     @property
     def accession(self):
-        return self.id.split('|')[3]
+        return self._description.split('|')[3]
     
     @property
     def specimen(self):
@@ -124,11 +124,8 @@ class SequencesClient(Endpoint):
     
 if __name__ == "__main__":
     test = SequencesClient()
-    #print test.url
-    test.get(ids='ACRJP618-11|ACRJP619-11')
-    print test.sequence_list[0].id
-    print test.sequence_list[0].seq
-    print test.sequence_list[0].specimen.taxonomy
-    print test.sequence_list[1].specimen.taxonomy
-    print test.sequence_list[1].tracefiles
+    test.get(taxon='Archaeorhizomycetes')
+    print test.sequence_list[0].sequence_record
+    print test.sequence_list[1].sequence_record
+
     
