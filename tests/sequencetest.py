@@ -1,7 +1,7 @@
 '''
 Created on 2015-12-12
 
-@author: kandalafti
+@author: Iyad Kandalaft <iyad.kandalaft@agr.gc.ca>
 '''
 import unittest
 
@@ -45,17 +45,19 @@ class Test(unittest.TestCase):
         self.assertTrue(hasattr(self.sequences_client, 'sequence_list'), 'SequencesClient does not have a sequence_list attribute')
         self.assertIsInstance(self.sequences_client.sequence_list, list, 'SequencesClient.sequence_list must be of a list')
     
-    def test_get_processids(self):
-        sequence_list = self._test_get(ids='|'.join(self.process_ids))
-        for sequence in sequence_list:
-            self.assertIn(sequence.process_id, self.process_ids, 'Returned Specimen {} was not part of original search criteria'.format(sequence.process_id))
+    def test_get_process_ids(self):
+        self.sequences_client.get(ids='|'.join(self.process_ids))
+        process_ids = self.sequences_client.get_process_ids()
+        self.assertIsInstance(process_ids, list, "SequencesClient.get_process_ids should return a list of process ids")
+        for process_id in process_ids:
+            self.assertIn(process_id, self.process_ids, 'Returned sequence process_id ({}) was not part of original search criteria'.format(process_id))
 
     def test_get_specimens(self):
         self.sequences_client.get(ids='|'.join(self.process_ids))
         specimen_list = self.sequences_client.get_specimens()
         self.assertIsInstance(specimen_list, list, "SequencesClient.get_specimens() should return a list of Specimen.")
-        for sequence in specimen_list:
-            self.assertIsInstance(sequence, pybold.specimen.Specimen, "SequencesClient.get_specimens() should return a list of Specimen.")
+        for specimen in specimen_list:
+            self.assertIsInstance(specimen, pybold.specimen.Specimen, "SequencesClient.get_specimens() should return a list of Specimen.")
     
     def test_get_tracefiles(self):
         self.sequences_client.get(ids='|'.join(self.process_ids))
@@ -75,7 +77,7 @@ class Test(unittest.TestCase):
                                                  geo=geo,
                                                  marker=marker,
                                                  timeout=timeout)
-        msg = 'SequencesClient.get() should return a list of sequences'
+        msg = 'SequencesClient.get() should return a list of Sequence objects'
         self.assertIsNotNone(sequence_list, msg)
         self.assertIsInstance(sequence_list, list, msg )
         self.assertIsInstance(sequence_list[0], pybold.sequence.Sequence, msg)
@@ -85,7 +87,7 @@ class Test(unittest.TestCase):
     def test_get_by_processids(self):
         sequence_list = self._test_get(ids='|'.join(self.process_ids))
         for sequence in sequence_list:
-            self.assertIn(sequence.process_id, self.process_ids, 'Returned Sequence was not part of original search criteria')
+            self.assertIn(sequence.process_id, self.process_ids, 'Returned Sequence process_id ({}) was not part of original search criteria'.format(sequence.process_id))
 
     def test_get_by_taxon_and_marker(self):
         sequence_list = self._test_get(taxon='|'.join(self.taxons), marker='|'.join(self.markers))

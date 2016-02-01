@@ -6,10 +6,9 @@ Created on 2015-12-12
 from nose.tools import assert_is_instance
 import unittest
 
-from pybold.sequence import Sequence
-from pybold.specimen import SpecimensClient
+import pybold.sequence
 import pybold.specimen
-from pybold.tracefile import Tracefile
+import pybold.tracefile
 
 
 class SpecimensClientTest(unittest.TestCase):
@@ -57,7 +56,7 @@ class SpecimensClientTest(unittest.TestCase):
                                                  researchers=researchers, 
                                                  geo=geo,
                                                  timeout=timeout)
-        msg = 'SpecimensClient.get() should return a list of specimens'
+        msg = 'SpecimensClient.get() should return a list of Specimen objects'
         self.assertIsNotNone(specimen_list, msg)
         self.assertIsInstance(specimen_list, list, msg )
         self.assertIsInstance(specimen_list[0], pybold.specimen.Specimen, msg)
@@ -132,19 +131,26 @@ class SpecimensClientTest(unittest.TestCase):
         record_ids = self.specimen_client.get_record_ids()
         self.assertIsInstance(record_ids, list, "SpecimensClient.get_record_ids() should return a list of record ids.")
     
+    def test_get_process_ids(self):
+        self.specimen_client.get(ids='|'.join(self.process_ids))
+        process_ids = self.specimen_client.get_process_ids()
+        self.assertIsInstance(process_ids, list, "SpecimensClient.get_process_ids() should return a list of process ids.")
+        for process_id in process_ids:
+            self.assertIn(process_id, self.process_ids, "Returned specimen process_id ({}) was not part of original search criteria".format(process_id))
+    
     def test_sequences(self):
         self.specimen_client.get(ids='|'.join(self.process_ids))
         sequences = self.specimen_client.get_sequences()
         self.assertIsInstance(sequences, list, "SpecimensClient.get_sequences() should return a list of Sequence.")
         for sequence in sequences:
-            self.assertIsInstance(sequence, Sequence, "SpecimensClient.get_sequences() should return a list of Sequence.")
+            self.assertIsInstance(sequence, pybold.sequence.Sequence, "SpecimensClient.get_sequences() should return a list of Sequence.")
         
     def test_get_tracefiles(self):
         self.specimen_client.get(ids='|'.join(self.process_ids))
         tracefiles = self.specimen_client.get_tracefiles()
         self.assertIsInstance(tracefiles, list, "SpecimensClient.get_tracefiles() should return a list of Tracefile.")
         for tracefile in tracefiles:
-            self.assertIsInstance(tracefile, Tracefile, "SpecimensClient.get_tracefiles() should return a list of Tracefile.")
+            self.assertIsInstance(tracefile, pybold.tracefile.Tracefile, "SpecimensClient.get_tracefiles() should return a list of Tracefile.")
     
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
