@@ -9,8 +9,17 @@ import pybold.sequence
 import pybold.specimen
 import pybold.tracefile
 
+class TracefilesTest(unittest.TestCase):
+    def setUp(self):
+        pass
+    
+    def tearDown(self):
+        pass
+    
+    def test(self):
+        pass
 
-class Test(unittest.TestCase):
+class TracefilesClientTest(unittest.TestCase):
 
 
     def setUp(self):

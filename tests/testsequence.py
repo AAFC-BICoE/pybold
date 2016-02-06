@@ -3,12 +3,56 @@ Created on 2015-12-12
 
 @author: Iyad Kandalaft <iyad.kandalaft@agr.gc.ca>
 '''
+from Bio import SeqIO
+import StringIO
+import os.path
 import unittest
 
+from pybold.sequence import Sequence
 import pybold.sequence
 
 
-class Test(unittest.TestCase):
+TESTDATA_SEQUENCE = os.path.join(os.path.dirname(__file__), '../test-data/sequence_data.fa')
+
+
+class SequenceTest(unittest.TestCase):
+    def setUp(self):
+        with open(TESTDATA_SEQUENCE, 'r') as f:
+            sequence_data = f.read()
+            
+        sequences_handle = StringIO.StringIO(sequence_data)
+        
+        for record in SeqIO.parse(sequences_handle, "fasta"):
+            self.sequence = Sequence(record)
+            break
+    
+    def tearDown(self):
+        del self.sequence
+        
+    def test_sequence_record(self):
+        self.assertTrue(hasattr(self.sequence, "sequence_record"), "Sequence should have the sequence_reqcord attribute.")
+    
+    def test_seq(self):
+        self.assertTrue(hasattr(self.sequence, "seq"), "Sequence should have a seq attribute.")
+        self.assertIsInstance(self.sequence.seq, basestring, "Sequence.seq should return an ASCII sequence.")
+        
+    def test_process_id(self):
+        pass
+    
+    def test_identification(self):
+        pass
+    def test_marker(self):
+        pass
+    def test_accession(self):
+        pass
+    def test_specimen(self):
+        pass
+    def test_tracefiles(self):
+        pass
+
+    
+
+class SequencesClientTest(unittest.TestCase):
 
 
     def setUp(self):

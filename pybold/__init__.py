@@ -13,6 +13,7 @@ class Endpoint(object):
     def __init__(self):
         super(Endpoint,self)
         self._set_base_url()
+        self.session = None;
 
         
     def _set_base_url(self):
@@ -23,8 +24,14 @@ class Endpoint(object):
         
         self.url = urljoin(self.base_url, self.ENDPOINT_NAME)
         
-    def get(self, payload, timeout=5):
-        result = requests.get(self.url, params=payload, timeout=timeout)
+    def get(self, payload, timeout=5, keep_alive=True):
+        if keep_alive:
+            if self.session is None:
+                self.session = requests.Session()
+            result = self.session.get(self.url, params=payload, timeout=timeout)
+        else:
+            result = requests.get(self.url, params=payload, timeout=timeout)
+            
         if result.status_code != 200 and result.status_code != 304:
             result.raise_for_status()
         

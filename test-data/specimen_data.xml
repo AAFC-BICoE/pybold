@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bold_records  xsi:noNamespaceSchemaLocation="http://www.boldsystems.org/schemas/BOLDPublic_record.xsd"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <record>
+    <record_id>2376157</record_id>
+    <processid>ACRJP618-11</processid>
+    <bin_uri>BOLD:AAE7234</bin_uri>
+    <specimen_identifiers>
+      <sampleid>BC-MNHNJP1055</sampleid>
+      <fieldnum>BC-MNHNJP1055</fieldnum>
+      <institution_storing>Research Collection of G. Seraphin</institution_storing>
+    </specimen_identifiers>
+    <taxonomy>
+      <identification_provided_by>Seraphin Gilles</identification_provided_by>
+      <phylum>
+        <taxon>
+          <taxID>20</taxID>
+          <name>Arthropoda</name>
+        </taxon>
+      </phylum>
+      <class>
+        <taxon>
+          <taxID>82</taxID>
+          <name>Insecta</name>
+        </taxon>
+      </class>
+      <order>
+        <taxon>
+          <taxID>113</taxID>
+          <name>Lepidoptera</name>
+        </taxon>
+      </order>
+    </taxonomy>
+    <specimen_details>
+      <voucher_type></voucher_type>
+      <voucher_desc></voucher_desc>
+      <reproduction>S</reproduction>
+      <sex>M</sex>
+      <lifestage>A</lifestage>
+    </specimen_details>
+    <collection_event>
+      <collectors>local collector</collectors>
+      <collectiondate>2008-09-01</collectiondate>
+      <coordinates>
+        <lat>-6.05</lat>
+        <lon>-77.6167</lon>
+        <coord_source></coord_source>
+        <coord_accuracy></coord_accuracy>
+      </coordinates>
+      <country>Peru</country>
+      <province>San Martin</province>
+    </collection_event>
+    <tracefiles>
+      <read>
+        <read_id>3786784</read_id>
+        <run_date>2012-02-13T17:38:46</run_date>
+        <sequencing_center>Biodiversity Institute of Ontario</sequencing_center>
+        <direction>F</direction>
+        <seq_primer>LepF1</seq_primer>
+        <trace_link>http://trace.boldsystems.org/traceIO/bold.org/5268190</trace_link>
+        <markercode>COI-5P</markercode>
+      </read>
+    </tracefiles>
+    <notes></notes>
+  </record>
+  <record>
+    <record_id>2376158</record_id>
+    <processid>ACRJP619-11</processid>
+    <bin_uri>BOLD:AAE7234</bin_uri>
+    <specimen_identifiers>
+      <sampleid>BC-MNHNJP1056</sampleid>
+      <fieldnum>BC-MNHNJP1056</fieldnum>
+      <institution_storing>Research Collection of G. Seraphin</institution_storing>
+    </specimen_identifiers>
+    <taxonomy>
+      <identification_provided_by>Seraphin Gilles</identification_provided_by>
+      <phylum>
+        <taxon>
+          <taxID>20</taxID>
+          <name>Arthropoda</name>
+        </taxon>
+      </phylum>
+      <class>
+        <taxon>
+          <taxID>82</taxID>
+          <name>Insecta</name>
+        </taxon>
+      </class>
+      <order>
+        <taxon>
+          <taxID>113</taxID>
+          <name>Lepidoptera</name>
+        </taxon>
+      </order>
+    </taxonomy>
+    <specimen_details>
+      <voucher_type></voucher_type>
+      <voucher_desc></voucher_desc>
+      <reproduction>S</reproduction>
+      <sex>M</sex>
+      <lifestage>A</lifestage>
+    </specimen_details>
+    <collection_event>
+      <collectors>local collector</collectors>
+      <collectiondate>2007-03-01</collectiondate>
+      <coordinates>
+        <lat>-3.62</lat>
+        <lon>-73.9667</lon>
+        <coord_source></coord_source>
+        <coord_accuracy></coord_accuracy>
+      </coordinates>
+      <country>Peru</country>
+      <province>Loreto</province>
+    </collection_event>
+    <tracefiles>
+      <read>
+        <read_id>3786785</read_id>
+        <run_date>2012-02-13T17:38:46</run_date>
+        <sequencing_center>Biodiversity Institute of Ontario</sequencing_center>
+        <direction>F</direction>
+        <seq_primer>LepF1</seq_primer>
+        <trace_link>http://trace.boldsystems.org/traceIO/bold.org/5268191</trace_link>
+        <markercode>COI-5P</markercode>
+      </read>
+      <read>
+        <read_id>3786734</read_id>
+        <run_date>2012-02-13T19:05:43</run_date>
+        <sequencing_center>Biodiversity Institute of Ontario</sequencing_center>
+        <direction>R</direction>
+        <seq_primer>LepR1</seq_primer>
+        <trace_link>http://trace.boldsystems.org/traceIO/bold.org/5268140</trace_link>
+        <markercode>COI-5P</markercode>
+      </read>
+    </tracefiles>
+    <notes></notes>
+  </record>
+</bold_records>

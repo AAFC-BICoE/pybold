@@ -3,7 +3,8 @@ Created on 2015-12-12
 
 @author: Iyad Kandalaft <iyad.kandalaft@agr.gc.ca>
 '''
-from nose.tools import assert_is_instance
+from lxml import objectify
+import os.path
 import unittest
 
 import pybold.sequence
@@ -11,6 +12,65 @@ import pybold.specimen
 import pybold.tracefile
 
 
+TESTDATA_SPECIMEN = os.path.join(os.path.dirname(__file__), '../test-data/specimen_data.xml')
+
+class SpecimenTest(unittest.TestCase):
+    def setUp(self):
+        with open(TESTDATA_SPECIMEN, 'r') as f:
+            specimen_data = f.read()
+            
+        bold_specimens = objectify.fromstring(specimen_data)
+        
+        if not hasattr(bold_specimens, "record"):
+            raise AttributeError("BOLD specimen test data ({}) should have one or more records.".format(TESTDATA_SPECIMEN))
+        
+        self.specimen = pybold.specimen.Specimen(bold_specimens.record[0])
+
+    def tearDown(self):
+        del self.specimen
+        
+    def test_has_record(self):
+        self.assertTrue(hasattr(self.specimen, "record"), "Specimen should have a record attribute.")
+    
+    def test_is_instance(self):
+        self.assertIsInstance(self.specimen, pybold.specimen.Specimen, "self.specimen failed to instantiate as a Specimen.")
+        
+    def test_taxonomy(self):
+        self.assertTrue(hasattr(self.specimen, "taxonomy"), "Specimen should have a convenience attribute for taxonomy.")
+
+        taxa = self.specimen.taxonomy
+        self.assertIsInstance(taxa, dict, 'Specimen.taxonomy should return a dictionary.')
+        for rank in ('phylum', 'class', 'order', 'family', 'subfamily', 'genus', 'species'):
+            self.assertIn(rank, taxa.keys(), "Rank {} is not present in the Specimen.taxonomy dictionary.".format(rank))
+        
+        msg = "Loaded taxonomy doesn't match content of test data {}".format(TESTDATA_SPECIMEN)
+        self.assertEqual(taxa['phylum'], "Arthropoda", msg)
+        self.assertEqual(taxa['class'], "Insecta", msg)
+        self.assertEqual(taxa['order'], "Lepidoptera", msg)
+
+    
+    def test_record_id(self):
+        self.assertTrue(hasattr(self.specimen, "record_id"), "Specimen should have a convenience attribute for record_id.")
+        self.assertEqual(self.specimen.record_id, 2376157, "Specimen.record_id {} should be 2376157".format(self.specimen.record_id))
+    
+    def test_process_id(self):
+        self.assertTrue(hasattr(self.specimen, "process_id"), "Specimen should have a convenience attribute for process_id.")
+        self.assertEqual(self.specimen.process_id, "ACRJP618-11", "Specimen.process_id {} should be ACRJP618-11".format(self.specimen.process_id))
+        
+    def test_geography(self):
+        self.assertTrue(hasattr(self.specimen, "geography"), "Specimen should have a convenience attribute for geography.")
+        msg = "Specimen.geography should return an object with Country, Province, Region, Coordinates attributes."
+        geo = self.specimen.geography
+        for attribute in ("country", "province", "region", "coordinates"):
+            self.assertTrue(hasattr(geo, attribute), msg)
+                    
+    def test_sequence(self):
+        pass
+    
+    def test_tracefiles(self):
+        pass
+    
+        
 class SpecimensClientTest(unittest.TestCase):
     def setUp(self):
         # Search criteria to be used and validated against
@@ -151,7 +211,9 @@ class SpecimensClientTest(unittest.TestCase):
         self.assertIsInstance(tracefiles, list, "SpecimensClient.get_tracefiles() should return a list of Tracefile.")
         for tracefile in tracefiles:
             self.assertIsInstance(tracefile, pybold.tracefile.Tracefile, "SpecimensClient.get_tracefiles() should return a list of Tracefile.")
-    
+
+suite = unittest.TestLoader().loadTestsFromTestCase(SpecimensClientTest)
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
