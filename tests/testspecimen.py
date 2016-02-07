@@ -29,14 +29,17 @@ class SpecimenTest(unittest.TestCase):
     def tearDown(self):
         del self.specimen
         
+    def _has_attribute(self, attr_name):
+        self.assertTrue(hasattr(self.specimen, attr_name), "Specimen should have the {} attribute.".format(attr_name))
+        
     def test_has_record(self):
-        self.assertTrue(hasattr(self.specimen, "record"), "Specimen should have a record attribute.")
+        self._has_attribute("record")
     
     def test_is_instance(self):
         self.assertIsInstance(self.specimen, pybold.specimen.Specimen, "self.specimen failed to instantiate as a Specimen.")
         
     def test_taxonomy(self):
-        self.assertTrue(hasattr(self.specimen, "taxonomy"), "Specimen should have a convenience attribute for taxonomy.")
+        self._has_attribute("taxonomy")
 
         taxa = self.specimen.taxonomy
         self.assertIsInstance(taxa, dict, 'Specimen.taxonomy should return a dictionary.')
@@ -50,26 +53,32 @@ class SpecimenTest(unittest.TestCase):
 
     
     def test_record_id(self):
-        self.assertTrue(hasattr(self.specimen, "record_id"), "Specimen should have a convenience attribute for record_id.")
+        self._has_attribute("record_id")
         self.assertEqual(self.specimen.record_id, 2376157, "Specimen.record_id {} should be 2376157".format(self.specimen.record_id))
     
     def test_process_id(self):
-        self.assertTrue(hasattr(self.specimen, "process_id"), "Specimen should have a convenience attribute for process_id.")
-        self.assertEqual(self.specimen.process_id, "ACRJP618-11", "Specimen.process_id {} should be ACRJP618-11".format(self.specimen.process_id))
+        self._has_attribute("process_id")
+        self.assertIsInstance(self.specimen.process_id, basestring, "Specimen.process_id")
+        exp_process_id = "ACRJP618-11"
+        self.assertEqual(self.specimen.process_id, exp_process_id, "Specimen.process_id {} does not match content of test data {}".format(self.specimen.process_id, exp_process_id))
         
     def test_geography(self):
-        self.assertTrue(hasattr(self.specimen, "geography"), "Specimen should have a convenience attribute for geography.")
+        self._has_attribute("geography")
         msg = "Specimen.geography should return an object with Country, Province, Region, Coordinates attributes."
         geo = self.specimen.geography
         for attribute in ("country", "province", "region", "coordinates"):
             self.assertTrue(hasattr(geo, attribute), msg)
                     
     def test_sequence(self):
-        pass
+        self._has_attribute("sequence")
+        self.assertIsInstance(self.specimen.sequence, pybold.sequence.Sequence, "Specimen.sequence should return a Sequence object.")
+        #TODO add valid test for sequence method
     
     def test_tracefiles(self):
-        pass
-    
+        self._has_attribute("tracefiles")
+        self.assertIsInstance(self.specimen.tracefiles, list, "Specimen.tracefiles should return a list of Tracefile objects.")
+        for tracefile in self.specimen.tracefiles:
+            self.assertIsInstance(tracefile, pybold.tracefile.Tracefile, "Specimen.tracefiles should return a list of Tracefile objects.")
         
 class SpecimensClientTest(unittest.TestCase):
     def setUp(self):

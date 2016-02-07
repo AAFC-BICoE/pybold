@@ -4,8 +4,10 @@ Created on 2015-12-12
 @author: Iyad Kandalaft <iyad.kandalaft@agr.gc.ca>
 '''
 from Bio import SeqIO
+import Bio.Seq
 import StringIO
 import os.path
+from twisted.python.util import println
 import unittest
 
 from pybold.sequence import Sequence
@@ -28,29 +30,49 @@ class SequenceTest(unittest.TestCase):
     
     def tearDown(self):
         del self.sequence
+    
+    def _has_attribute(self, attr_name):
+        self.assertTrue(hasattr(self.sequence, attr_name), "Sequence should have the {} attribute.".format(attr_name))
         
     def test_sequence_record(self):
-        self.assertTrue(hasattr(self.sequence, "sequence_record"), "Sequence should have the sequence_reqcord attribute.")
+        self._has_attribute("sequence_record")
     
     def test_seq(self):
-        self.assertTrue(hasattr(self.sequence, "seq"), "Sequence should have a seq attribute.")
-        self.assertIsInstance(self.sequence.seq, basestring, "Sequence.seq should return an ASCII sequence.")
+        self._has_attribute("seq")
+        self.assertIsInstance(self.sequence.seq, Bio.Seq.Seq, "Sequence.seq should return a Bio.Seq.Seq object.")
+        self.assertEqual(str(self.sequence.seq), "NNNNNNNNNNNNNTTCGGCGCATGGGCTGGTATAGTAGGTACTGCCCTTAGCCTACTTATCCGTGCAGAACTAGGTCAACCAGGAACCCTTCTAGGAGACGACCAAATCTACAACGTAATCGTCACCGCCCATGCCTTTGTAATAATCTTCTTCATAGTAATACCTATCATAATTGGGGGCTTCGGAAACTGATTAGTCCCACTTATAATTGGTGCTCCCGACATGGCATTCCCACGTATGAACAACATAAGCTTCTGACTACTCCCCCCATCATTCTTACTTCTCCTAGCCTCCTCTACAGTAGAAGCTGGGGCAGGCACGGGATGAACCGTGTACCCTCCCCTAGCCGGTAATCTAGCCCATGCCGGAGCTTCAGTGGATTTAGCAATCTTCTCCCTCCATCTAGCAGGTGTATCCTCTATCCTTGGTGCTATCAACTTTATCACCACAGCTATCAACATAAAACCCCCCGCCCTTTCACAATACCAAACTCCTCTATTTGTATGATCCGTACTTATCACTGCCGTTCTACTATTACTCTCACTCCCAGTACTTGCCGCCGGTATCACTATGTTGTTAACAGACCGAAACCTAAACACAACGTTCTTTGATCCTGCTGGAGG----------------------------------------------------------------------", "Sequence.seq does not match expected string.") 
         
     def test_process_id(self):
-        pass
+        self._has_attribute("process_id")
+        self.assertIsInstance(self.sequence.process_id, basestring, "Sequence.process_id should be a string.")
+        exp_process_id = "CDUSM030-05"
+        self.assertEqual(self.sequence.process_id, exp_process_id, "Sequence.process_id {} does not match content of test data {}.".format(self.sequence.process_id, exp_process_id))
     
     def test_identification(self):
-        pass
-    def test_marker(self):
-        pass
-    def test_accession(self):
-        pass
-    def test_specimen(self):
-        pass
-    def test_tracefiles(self):
-        pass
-
+        self._has_attribute("identification")
+        exp_identification = "Thalasseus sandvicensis"
+        self.assertEqual(self.sequence.identification, exp_identification, "Sequence.identification {} does not match content of test data {}.".format(self.sequence.identification, exp_identification))
     
+    def test_marker(self):
+        self._has_attribute("marker")
+        exp_marker = "COI-5P"
+        self.assertEqual(self.sequence.marker, exp_marker, "Sequence.marker {} does not match content of test data {}.".format(self.sequence.marker, exp_marker))
+        
+    def test_accession(self):
+        self._has_attribute("accession")
+        exp_accession = "DQ433214"
+        self.assertEqual(self.sequence.accession, exp_accession, "Sequence.accession {} does not match content of test data {}.".format(self.sequence.accession, exp_accession))
+        
+    def test_specimen(self):
+        self._has_attribute("specimen")
+        self.assertIsInstance(self.sequence.specimen, pybold.specimen.Specimen, "Sequence.specimen should return a Specimen object.")
+        self.assertEqual(self.sequence.process_id, self.sequence.specimen.process_id, "Sequence.sequence's process_id does not match its sequence.process_id")
+
+    def test_tracefiles(self):
+        self._has_attribute("tracefiles")
+        self.assertIsInstance(self.sequence.tracefiles, list, "Sequence.tracefiles should return a list of tracefile objects.")
+        for tracefile in self.sequence.tracefiles:
+            self.assertIsInstance(tracefile, pybold.tracefile.Tracefile, "Sequence.tracefiles should return a list of tracefile objects.")
 
 class SequencesClientTest(unittest.TestCase):
 
