@@ -72,7 +72,7 @@ class SpecimenTest(unittest.TestCase):
     def test_sequence(self):
         self._has_attribute("sequence")
         self.assertIsInstance(self.specimen.sequence, pybold.sequence.Sequence, "Specimen.sequence should return a Sequence object.")
-        #TODO add valid test for sequence method
+        self.assertEqual(self.specimen.process_id, self.specimen.sequence.process_id, "Specimen.process_id should match its Sequence.process_id.")
     
     def test_tracefiles(self):
         self._has_attribute("tracefiles")

@@ -3,22 +3,78 @@ Created on 2015-12-12
 
 @author: Iyad Kandalaft <iyad.kandalaft@agr.gc.ca>
 '''
+import os.path
+import tarfile
 import unittest
 
 import pybold.sequence
 import pybold.specimen
 import pybold.tracefile
 
+
+TESTDATA_TRACEFILES_TAR = os.path.join(os.path.dirname(__file__), '../test-data/trace_files.tar')
+
 class TracefilesTest(unittest.TestCase):
     def setUp(self):
-        pass
+        self.process_ids = ['ACRJP618-11', 'ACRJP619-11']
+        self.markers = []
+        self.format = ""
+        self.tracefile_list = pybold.tracefile.Tracefile.parse_from_tar(file_name=TESTDATA_TRACEFILES_TAR)
     
     def tearDown(self):
+        del self.process_ids
+        del self.markers
+    
+    def _parse_from_tar(self, tracefile_list):
+        self.assertIsNotNone(tracefile_list, "Failed to parse a tar with tracefiles: returned null.")
+        self.assertIsInstance(tracefile_list, list, "Tracefile.parse_from_tar should return a list of Tracefile objects.")
+        for item in tracefile_list:
+            self.assertIsInstance(item, pybold.tracefile.Tracefile, "Tracefile.parse_from_tar should return a list of Tracefile objects")
+    
+    def test_parse_from_tar_by_string(self):
+        with open(TESTDATA_TRACEFILES_TAR, 'r') as f:
+            tracefile_list = pybold.tracefile.Tracefile.parse_from_tar(tar_string=f.read())            
+            self._parse_from_tar(tracefile_list)
+    
+    def test_parse_from_tar_by_path(self):
+        tracefile_list = pybold.tracefile.Tracefile.parse_from_tar(file_name=TESTDATA_TRACEFILES_TAR)
+        self._parse_from_tar(tracefile_list)
+        
+    def test_parse_from_tar_without_params(self):
+        self.assertRaises(tarfile.ReadError, pybold.tracefile.Tracefile.parse_from_tar)
+    
+    def _has_attribute(self, attr_name):
+        for item in self.tracefile_list:
+            self.assertTrue(hasattr(item, attr_name), "Tracefile should have the {} attribute.".format(attr_name))
+    
+    def test_format(self):
+        self._has_attribute("format")
+        for tracefile in self.tracefile_list:
+            self.assertEqual(tracefile.format, "ab1", "Tracefile is not in the expected format (ab1).")
+    
+    def test_specimen(self):
+        self._has_attribute("specimen")
+        for tracefile in self.tracefile_list:
+            self.assertIsInstance(tracefile.specimen, pybold.specimen.Specimen, "Tracefile objects should have a specimen attribute.")
+            self.assertEqual(tracefile.process_id, tracefile.specimen.process_id, "Tracefile.process_id should equal Tracefile.specimen.process_id.")
+            
+    def test_sequence(self):
+        self._has_attribute("sequence")
+        for tracefile in self.tracefile_list:
+            self.assertIsInstance(tracefile.sequence, pybold.sequence.Sequence, "Tracefile objects should have a sequence attribute.")
+    
+    def test_to_file(self):
         pass
     
-    def test(self):
+    def test_to_file_with_dir_path(self):
         pass
-
+    
+    def test_to_file_with_dir_path_and_filename(self):
+        pass
+    
+    def test_to_file_with_filename(self):
+        pass
+    
 class TracefilesClientTest(unittest.TestCase):
 
 

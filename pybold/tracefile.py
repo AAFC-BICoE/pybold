@@ -19,6 +19,66 @@ class Tracefile(object):
     '''
     classdocs
     '''
+    
+    @staticmethod
+    def parse_from_tar(file_name=None, tar_string=None):
+        '''
+        @raise tarfile.ReadError: If the BOLD API return an invalid tarfile
+        @raise ValueError: If the Process ID in the TRACE_FILE_INFO.txt does not match a file name inside the tar archive
+        @return Returns a list of Tracefile objects
+        '''
+        if tar_string is not None:
+            fileobj = StringIO.StringIO(tar_string)
+        else:
+            fileobj = None
+
+        chromat_tar = tarfile.open(name=file_name, mode='r:', fileobj=fileobj)
+        
+        # Build a dictionary containing the process_id, taxon, marker, genbank_accession, and filename 
+        # based on the content of the TRACE_FILE_INFO.txt within the tar archive
+        fileobj = chromat_tar.extractfile('TRACE_FILE_INFO.txt')
+        tracefiles_d = {}
+        for row in fileobj.readlines():
+            row_traceinfo = row.rstrip().split("\t")
+            if len(row_traceinfo) != 5:
+                continue
+            tracefiles_d[row_traceinfo[0]] = {'process_id': row_traceinfo[0],
+                                             'taxon': row_traceinfo[1],
+                                             'marker': row_traceinfo[2],
+                                             'genbank_accession': row_traceinfo[3],
+                                             'tracefile': row_traceinfo[4] 
+                                             }
+        
+        tracefile_list = [];
+        
+        for member in chromat_tar.getmembers():
+            if not member.isfile() or member.name == 'TRACE_FILE_INFO.txt':
+                continue
+            
+            fileobj = chromat_tar.extractfile(member)
+            
+            for process_id in tracefiles_d.keys():
+                if process_id not in member.name:
+                    continue
+                
+                # Exit the loop because we found the process id in the tracefile name
+                break
+            
+            if not process_id:
+                raise ValueError()
+            
+            tracefile_list.append(Tracefile(process_id,
+                                                fileobj, 
+                                                tracefiles_d[process_id]['marker'], 
+                                                tracefiles_d[process_id]['taxon'], 
+                                                tracefiles_d[process_id]['genbank_accession'],
+                                                member.name
+                                                )
+                                       )
+            
+        chromat_tar.close()
+        
+        return tracefile_list
 
     def __init__(self, process_id, fileobj, marker, taxon, genbank_accession, filename):
         '''
@@ -94,7 +154,7 @@ class TracefilesClient(Endpoint):
     
     def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, marker=None, timeout=5):
         '''
-        @raise tarfile.ReadError: If the BOLD API return an invalid tarfile
+
         '''
         result = super(TracefilesClient, self).get({
                                     'taxon': taxon, 
@@ -106,54 +166,11 @@ class TracefilesClient(Endpoint):
                                     'geo': geo,
                                     'marker': marker }, timeout=timeout)
 
-        self._parse_tracefiles(result)
+        self.tracefile_list = Tracefile.parse_from_tar(result)
         
         return self.tracefile_list
         
-    def _parse_tracefiles(self, response):
-        chromat_tar = tarfile.open(mode='r:', fileobj=StringIO.StringIO(response))
-        
-        # Build a dictionary containing the process_id, taxon, marker, genbank_accession, and filename 
-        # based on the content of the TRACE_FILE_INFO.txt within the tar archive
-        fileobj = chromat_tar.extractfile('TRACE_FILE_INFO.txt')
-        tracefiles_d = {}
-        for row in fileobj.readlines():
-            row_traceinfo = row.rstrip().split("\t")
-            if len(row_traceinfo) != 5:
-                continue
-            tracefiles_d[row_traceinfo[0]] = {'process_id': row_traceinfo[0],
-                                             'taxon': row_traceinfo[1],
-                                             'marker': row_traceinfo[2],
-                                             'genbank_accession': row_traceinfo[3],
-                                             'tracefile': row_traceinfo[4] 
-                                             }
-        
-        for member in chromat_tar.getmembers():
-            if not member.isfile() or member.name == 'TRACE_FILE_INFO.txt':
-                continue
-            
-            fileobj = chromat_tar.extractfile(member)
-            
-            for process_id in tracefiles_d.keys():
-                if process_id not in member.name:
-                    continue
-                
-                # Exit the loop because we found the process id in the tracefile name
-                break
-            
-            if not process_id:
-                raise ValueError()
-            
-            self.tracefile_list.append(Tracefile(process_id,
-                                                fileobj, 
-                                                tracefiles_d[process_id]['marker'], 
-                                                tracefiles_d[process_id]['taxon'], 
-                                                tracefiles_d[process_id]['genbank_accession'],
-                                                member.name
-                                                )
-                                       )
-            
-        chromat_tar.close()
+
 
     def get_process_ids(self):
         ids = []
@@ -169,7 +186,6 @@ class TracefilesClient(Endpoint):
     def get_specimens(self):
         ids_query = '|'.join(self.get_process_ids())
         return pybold.specimen.SpecimensClient(self.base_url).get(ids=ids_query)
-        
 
 if __name__ == "__main__":
     test = TracefilesClient()
