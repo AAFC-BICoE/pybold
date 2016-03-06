@@ -17,8 +17,10 @@ TESTDATA_TRACEFILES_TAR = os.path.join(os.path.dirname(__file__), '../test-data/
 class TracefilesTest(unittest.TestCase):
     def setUp(self):
         self.process_ids = ['ACRJP618-11', 'ACRJP619-11']
-        self.markers = []
-        self.format = ""
+        self.markers = ['COI-5P']
+        self.formats = ['ab1']
+        self.taxons = ['Lepidoptera']
+        self.filenames = ['ACRJP619-11[LepF1,LepR1]_R.ab1','ACRJP619-11[LepF1,LepR1]_F.ab1', 'ACRJP618-11[LepF1,LepR1]_F.ab1']
         self.tracefile_list = pybold.tracefile.Tracefile.parse_from_tar(file_name=TESTDATA_TRACEFILES_TAR)
     
     def tearDown(self):
@@ -41,16 +43,12 @@ class TracefilesTest(unittest.TestCase):
         self._parse_from_tar(tracefile_list)
         
     def test_parse_from_tar_without_params(self):
-        self.assertRaises(tarfile.ReadError, pybold.tracefile.Tracefile.parse_from_tar)
+        with self.assertRaises(ValueError):
+            pybold.tracefile.Tracefile.parse_from_tar()
     
     def _has_attribute(self, attr_name):
         for item in self.tracefile_list:
             self.assertTrue(hasattr(item, attr_name), "Tracefile should have the {} attribute.".format(attr_name))
-    
-    def test_format(self):
-        self._has_attribute("format")
-        for tracefile in self.tracefile_list:
-            self.assertEqual(tracefile.format, "ab1", "Tracefile is not in the expected format (ab1).")
     
     def test_specimen(self):
         self._has_attribute("specimen")
@@ -63,8 +61,40 @@ class TracefilesTest(unittest.TestCase):
         for tracefile in self.tracefile_list:
             self.assertIsInstance(tracefile.sequence, pybold.sequence.Sequence, "Tracefile objects should have a sequence attribute.")
     
+    def test_process_id(self):
+        self._has_attribute("process_id")
+        for tracefile in self.tracefile_list:
+            self.assertIn(tracefile.process_id, self.process_ids, "Tracefile %s's process id (%s) is not in the anticipated list for the test-data.".format(tracefile.filename, tracefile.process_id))
+            
+    def test_format(self):
+        self._has_attribute("format")
+        for tracefile in self.tracefile_list:
+            self.assertEqual(tracefile.format, "ab1", "Tracefile %s's format (%s) is not in the anticipated list for the test-data.".format(tracefile.filename, tracefile.format))
+        
+    def test_marker(self):
+        self._has_attribute("marker")
+        for tracefile in self.tracefile_list:
+            self.assertIn(tracefile.marker, self.markers, "Tracefile %s's marker (%s) is not in the anticipated list of the test-data.".format(tracefile.filename, tracefile.marker))
+    
+    def test_taxon(self):
+        self._has_attribute("taxon")
+        for tracefile in self.tracefile_list:
+            self.assertIn(tracefile.taxon, self.taxons, "Tracefile %s's taxon (%s) is not in the anticipated list for the test-data.".format(tracefile.filename, tracefile.taxon))
+    
+    def test_genbank_accession(self):
+        self._has_attribute("genbank_accession")
+        # TODO: test for genbank accession
+    
+    def test_filename(self):
+        self._has_attribute("filename")
+        for tracefile in self.tracefile_list:
+            self.assertIn(tracefile.filename, self.filenames, "Tracefile's filename (%s) is not in the anticipated list for the test-data.".format(tracefile.filename))
+    
     def test_to_file(self):
-        pass
+        for tracefile in self.tracefile_list:
+            tracefile_path = tracefile.to_file()
+            self.assertTrue(os.path.exists(tracefile_path), "Attempted to write %s, but it does not exist.".format(tracefile_path))
+            self.assertEqual(os.path.basename(tracefile_path), tracefile_path.filename, "The tracefile was written to disk with an unexpected file name.")
     
     def test_to_file_with_dir_path(self):
         pass

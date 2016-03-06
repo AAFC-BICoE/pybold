@@ -24,6 +24,7 @@ class Tracefile(object):
     def parse_from_tar(file_name=None, tar_string=None):
         '''
         @raise tarfile.ReadError: If the BOLD API return an invalid tarfile
+        @raise ValueError: If neither the file_name and the tar_string args are provided
         @raise ValueError: If the Process ID in the TRACE_FILE_INFO.txt does not match a file name inside the tar archive
         @return Returns a list of Tracefile objects
         '''
@@ -125,6 +126,11 @@ class Tracefile(object):
         self.__sequence =  sequence_obj
 
     def to_file(self, dir_path=None, filename=None):
+        '''
+        Writes the tracefile to disk
+        @raise IOError: when writing the tracefile 
+        @return: Path to the trace file written to disk
+        '''
         if dir_path is None:
             dir_path = os.path.curdir
         else:
@@ -132,18 +138,15 @@ class Tracefile(object):
             
         if filename is None:
             filename = self.filename
-
-        original_pos = self.fileobj.tell()
-        self.fileobj.seek(0)
         
         full_path = os.path.join(dir_path, filename)
         with open(full_path, 'w+') as fh:
+            original_pos = self.fileobj.tell()
+            self.fileobj.seek(0)
             fh.write(self.fileobj.read())
-        
-        self.fileobj.seek(original_pos)
-        
-        return full_path
-     
+            self.fileobj.seek(original_pos)
+            return full_path
+    
 class TracefilesClient(Endpoint):
     ENDPOINT_NAME = 'trace'
     
@@ -166,7 +169,7 @@ class TracefilesClient(Endpoint):
                                     'geo': geo,
                                     'marker': marker }, timeout=timeout)
 
-        self.tracefile_list = Tracefile.parse_from_tar(result)
+        self.tracefile_list = Tracefile.parse_from_tar(tar_string=result)
         
         return self.tracefile_list
         
