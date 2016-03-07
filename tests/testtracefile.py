@@ -94,16 +94,32 @@ class TracefilesTest(unittest.TestCase):
         for tracefile in self.tracefile_list:
             tracefile_path = tracefile.to_file()
             self.assertTrue(os.path.exists(tracefile_path), "Attempted to write %s, but it does not exist.".format(tracefile_path))
-            self.assertEqual(os.path.basename(tracefile_path), tracefile_path.filename, "The tracefile was written to disk with an unexpected file name.")
+            self.assertEqual(os.path.basename(tracefile_path), tracefile.filename, "The tracefile was written to disk with an unexpected file name.")
     
     def test_to_file_with_dir_path(self):
-        pass
+        chromat_dir = "/tmp"
+        for tracefile in self.tracefile_list:
+            tracefile_path = tracefile.to_file('/tmp')
+            self.assertTrue(os.path.exists(tracefile_path), "Attempted to write %s, but it does not exist.".format(tracefile_path))
+            self.assertEqual(os.path.basename(tracefile_path), tracefile.filename, "The tracefile was written to disk with an unexpected file name.")
+            self.assertEqual(os.path.dirname(tracefile_path), chromat_dir, "The tracefile was written to disk to an unexpected path.")
+
     
     def test_to_file_with_dir_path_and_filename(self):
-        pass
+        chromat_dir = "/tmp"
+        chromat_name = "tmp_chromat.ab1"
+        for tracefile in self.tracefile_list:
+            tracefile_path = tracefile.to_file(chromat_dir, chromat_name)
+            self.assertTrue(os.path.exists(tracefile_path), "Attempted to write %s, but it does not exist.".format(tracefile_path))
+            self.assertEqual(os.path.basename(tracefile_path), chromat_name, "The tracefile was written to disk with an unexpected file name.")
+            self.assertEqual(os.path.dirname(tracefile_path), chromat_dir, "The tracefile was written to disk to an unexpected path.")
     
     def test_to_file_with_filename(self):
-        pass
+        chromat_name = "tmp_chromat.ab1"
+        for tracefile in self.tracefile_list:
+            tracefile_path = tracefile.to_file(filename=chromat_name)
+            self.assertTrue(os.path.exists(tracefile_path), "Attempted to write %s, but it does not exist.".format(tracefile_path))
+            self.assertEqual(os.path.basename(tracefile_path), chromat_name, "The tracefile was written to disk with an unexpected file name.")
     
 class TracefilesClientTest(unittest.TestCase):
 

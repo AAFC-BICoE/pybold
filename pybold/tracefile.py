@@ -77,7 +77,7 @@ class Tracefile(object):
                                                 )
                                        )
             
-        chromat_tar.close()
+        #chromat_tar.close()
         
         return tracefile_list
 
@@ -133,7 +133,8 @@ class Tracefile(object):
         '''
         if dir_path is None:
             dir_path = os.path.curdir
-        else:
+        
+        if not os.path.exists(dir_path):
             os.makedirs(dir_path, 0755)
             
         if filename is None:
