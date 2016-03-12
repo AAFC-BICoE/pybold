@@ -47,12 +47,15 @@ class SpecimenTest(unittest.TestCase):
         self.assertIsInstance(taxa, dict, 'Specimen.taxonomy should return a dictionary.')
         for rank in ('phylum', 'class', 'order', 'family', 'subfamily', 'genus', 'species'):
             self.assertIn(rank, taxa.keys(), "Rank {} is not present in the Specimen.taxonomy dictionary.".format(rank))
-        
+             
         msg = "Loaded taxonomy doesn't match content of test data {}".format(TESTDATA['specimen'])
         self.assertEqual(taxa['phylum'], "Arthropoda", msg)
         self.assertEqual(taxa['class'], "Insecta", msg)
         self.assertEqual(taxa['order'], "Lepidoptera", msg)
-
+        self.assertEqual(taxa['family'], '', msg)
+        self.assertEqual(taxa['subfamily'], '', msg)
+        self.assertEqual(taxa['genus'], '', msg)
+        self.assertEqual(taxa['species'], '', msg)
     
     def test_record_id(self):
         self._has_attribute("record_id")
