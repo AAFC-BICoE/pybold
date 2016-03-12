@@ -1,8 +1,11 @@
 '''
-Created on 2015-12-12
-
-@author: Iyad Kandalaft <iyad.kandalaft@agr.gc.ca>
+:author: Iyad Kandalaft <iyad.kandalaft@canada.ca>
+:organization: Agriculture and Agri-Foods Canada
+:group: Microbial Biodiversity Bioinformatics
+:contact: mbb@agr.gc.ca 
+:license: LGPL v3
 '''
+
 from lxml import objectify
 import os.path
 import unittest
@@ -10,19 +13,18 @@ import unittest
 import pybold.sequence
 import pybold.specimen
 import pybold.tracefile
+from tests import TESTDATA
 
-
-TESTDATA_SPECIMEN = os.path.join(os.path.dirname(__file__), '../test-data/specimen_data.xml')
 
 class SpecimenTest(unittest.TestCase):
     def setUp(self):
-        with open(TESTDATA_SPECIMEN, 'r') as f:
+        with open(TESTDATA['specimen'], 'r') as f:
             specimen_data = f.read()
             
         bold_specimens = objectify.fromstring(specimen_data)
         
         if not hasattr(bold_specimens, "record"):
-            raise AttributeError("BOLD specimen test data ({}) should have one or more records.".format(TESTDATA_SPECIMEN))
+            raise AttributeError("BOLD specimen test data ({}) should have one or more records.".format(TESTDATA['specimen']))
         
         self.specimen = pybold.specimen.Specimen(bold_specimens.record[0])
 
@@ -46,7 +48,7 @@ class SpecimenTest(unittest.TestCase):
         for rank in ('phylum', 'class', 'order', 'family', 'subfamily', 'genus', 'species'):
             self.assertIn(rank, taxa.keys(), "Rank {} is not present in the Specimen.taxonomy dictionary.".format(rank))
         
-        msg = "Loaded taxonomy doesn't match content of test data {}".format(TESTDATA_SPECIMEN)
+        msg = "Loaded taxonomy doesn't match content of test data {}".format(TESTDATA['specimen'])
         self.assertEqual(taxa['phylum'], "Arthropoda", msg)
         self.assertEqual(taxa['class'], "Insecta", msg)
         self.assertEqual(taxa['order'], "Lepidoptera", msg)

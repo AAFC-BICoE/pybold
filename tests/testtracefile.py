@@ -1,8 +1,11 @@
 '''
-Created on 2015-12-12
-
-@author: Iyad Kandalaft <iyad.kandalaft@agr.gc.ca>
+:author: Iyad Kandalaft <iyad.kandalaft@canada.ca>
+:organization: Agriculture and Agri-Foods Canada
+:group: Microbial Biodiversity Bioinformatics
+:contact: mbb@agr.gc.ca 
+:license: LGPL v3
 '''
+
 import os.path
 import tarfile
 import unittest
@@ -10,9 +13,8 @@ import unittest
 import pybold.sequence
 import pybold.specimen
 import pybold.tracefile
+from tests import TESTDATA
 
-
-TESTDATA_TRACEFILES_TAR = os.path.join(os.path.dirname(__file__), '../test-data/trace_files.tar')
 
 class TracefilesTest(unittest.TestCase):
     def setUp(self):
@@ -21,7 +23,7 @@ class TracefilesTest(unittest.TestCase):
         self.formats = ['ab1']
         self.taxons = ['Lepidoptera']
         self.filenames = ['ACRJP619-11[LepF1,LepR1]_R.ab1','ACRJP619-11[LepF1,LepR1]_F.ab1', 'ACRJP618-11[LepF1,LepR1]_F.ab1']
-        self.tracefile_list = pybold.tracefile.Tracefile.parse_from_tar(file_name=TESTDATA_TRACEFILES_TAR)
+        self.tracefile_list = pybold.tracefile.Tracefile.parse_from_tar(file_name=TESTDATA['tracefiles_tar'])
     
     def tearDown(self):
         del self.process_ids
@@ -34,12 +36,12 @@ class TracefilesTest(unittest.TestCase):
             self.assertIsInstance(item, pybold.tracefile.Tracefile, "Tracefile.parse_from_tar should return a list of Tracefile objects")
     
     def test_parse_from_tar_by_string(self):
-        with open(TESTDATA_TRACEFILES_TAR, 'r') as f:
+        with open(TESTDATA['tracefiles_tar'], 'r') as f:
             tracefile_list = pybold.tracefile.Tracefile.parse_from_tar(tar_string=f.read())            
             self._parse_from_tar(tracefile_list)
     
     def test_parse_from_tar_by_path(self):
-        tracefile_list = pybold.tracefile.Tracefile.parse_from_tar(file_name=TESTDATA_TRACEFILES_TAR)
+        tracefile_list = pybold.tracefile.Tracefile.parse_from_tar(file_name=TESTDATA['tracefiles_tar'])
         self._parse_from_tar(tracefile_list)
         
     def test_parse_from_tar_without_params(self):

@@ -1,8 +1,11 @@
 '''
-Created on 2015-12-12
-
-@author: Iyad Kandalaft <iyad.kandalaft@agr.gc.ca>
+:author: Iyad Kandalaft <iyad.kandalaft@canada.ca>
+:organization: Agriculture and Agri-Foods Canada
+:group: Microbial Biodiversity Bioinformatics
+:contact: mbb@agr.gc.ca 
+:license: LGPL v3
 '''
+
 from Bio import SeqIO
 import Bio.Seq
 import StringIO
@@ -12,14 +15,12 @@ import unittest
 
 from pybold.sequence import Sequence
 import pybold.sequence
-
-
-TESTDATA_SEQUENCE = os.path.join(os.path.dirname(__file__), '../test-data/sequence_data.fa')
+from tests import TESTDATA
 
 
 class SequenceTest(unittest.TestCase):
     def setUp(self):
-        with open(TESTDATA_SEQUENCE, 'r') as f:
+        with open(TESTDATA['sequence'], 'r') as f:
             sequence_data = f.read()
             
         sequences_handle = StringIO.StringIO(sequence_data)
