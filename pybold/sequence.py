@@ -1,9 +1,10 @@
 '''
-Created on 2015-11-22
-
-@author: kandalafti
+:author: Iyad Kandalaft <iyad.kandalaft@canada.ca>
+:organization: Agriculture and Agri-Foods Canada
+:group: Microbial Biodiversity Bioinformatics
+:contact: mbb@agr.gc.ca 
+:license: LGPL v3
 '''
-
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -16,12 +17,11 @@ import pybold.tracefile
 
 
 class Sequence(object):
-    '''
-    classdocs
-    '''
+    '''Class to hold Sequence information.'''
     def __init__(self, sequence_record):
-        '''
-        Constructor
+        '''Initializes Sequence object
+        :param sequence_record: SeqRecord object from BioPython
+        :raise TypeError: when sequence_record is not an instance of SeqRecord 
         '''
         if not isinstance(sequence_record, SeqRecord):
             raise TypeError()
@@ -37,6 +37,8 @@ class Sequence(object):
     
     @property
     def seq(self):
+        '''Returns the ASCII sequence.
+        e.g. CTAG'''
         return self.sequence_record.seq
     
     @property
@@ -57,6 +59,7 @@ class Sequence(object):
     
     @property
     def specimen(self):
+        '''Lookup and return the Specimen object associated with this sequence based on the process ID.'''
         if self.__specimen is None:
             self.specimen = pybold.specimen.SpecimensClient().get(ids=self.process_id).pop()
              
@@ -68,6 +71,7 @@ class Sequence(object):
     
     @property
     def tracefiles(self):
+        '''Lookup and return the Tracefile object associated with this sequence based on the process ID.'''
         if self._tracefiles is None:
             self.tracefiles = pybold.tracefile.TracefilesClient().get(ids=self.process_id)
             
@@ -78,12 +82,13 @@ class Sequence(object):
         self._tracefiles = traces_list
         
 class SequencesClient(Endpoint):
-    '''
-    Classdocs
-    '''
+    '''WebServices consumer for the Sequences end-point that fetches Sequences based on the provided criteria and returns a list of Sequence objects.'''
     ENDPOINT_NAME = 'sequence'
     
     def __init__(self, base_url=PUBLIC_API_URL):
+        '''Initialize the object
+        :param base_url: Override the end-point URL
+        '''
         self.base_url = base_url
         super(SequencesClient, self).__init__()
         
@@ -91,6 +96,7 @@ class SequencesClient(Endpoint):
 
     
     def get(self, taxon=None, ids=None, bins=None, containers=None, institutions=None, researchers=None, geo=None, marker=None, timeout=5):
+        '''Fetch sequences that match the provided criteria and assign it to self.sequence_list and return the list'''
         result = super(SequencesClient, self).get({'taxon': taxon, 
                                     'ids': ids, 
                                     'bin': bins, 
@@ -108,6 +114,7 @@ class SequencesClient(Endpoint):
         return self.sequence_list
     
     def get_process_ids(self):
+        '''Return a list of process IDs for the fetched sequences'''
         ids = []
         for sequence in self.sequence_list:
             ids.append(sequence.process_id)
@@ -115,17 +122,16 @@ class SequencesClient(Endpoint):
         return ids
     
     def get_specimens(self):
+        '''Lookup and return Specimen objects for fetched sequences based on the process IDs'''
         ids_query = '|'.join(self.get_process_ids())
         return pybold.specimen.SpecimensClient(self.base_url).get(ids=ids_query)
     
     def get_tracefiles(self):
+        '''Lookup and return Tracefile objects for fetched sequences based on the process IDs'''
         ids_query = '|'.join(self.get_process_ids())
         return pybold.tracefile.TracefilesClient(self.base_url).get(ids=ids_query)
     
 if __name__ == "__main__":
-    test = SequencesClient()
-    test.get(taxon='Archaeorhizomycetes')
-    print test.sequence_list[0].sequence_record
-    print test.sequence_list[1].sequence_record
+    pass
 
     

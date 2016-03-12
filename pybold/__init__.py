@@ -1,10 +1,17 @@
+'''
+:author: Iyad Kandalaft <iyad.kandalaft@canada.ca>
+:organization: Agriculture and Agri-Foods Canada
+:group: Microbial Biodiversity Bioinformatics
+:contact: mbb@agr.gc.ca 
+:license: LGPL v3
+'''
+
 PUBLIC_API_URL = 'http://www.boldsystems.org/index.php/API_Public/'
 TAXON_API_URL = 'http://www.boldsystems.org/index.php/API_Tax/'
 
 from exceptions import ValueError
 import requests 
 from urlparse import urljoin
-
 
 class Endpoint(object):   
     ENDPOINT_NAME = None
